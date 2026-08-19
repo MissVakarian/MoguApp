@@ -8,8 +8,8 @@ Permite consultar recetas por fases de desbloqueo, verificar qué materiales nec
 
 ## ✨ Características Principales
 
-* 📜 **Recetas de Síntesis Organizadas por Tiers:**
-  * Separadas por los hitos de creación (Iniciales, 3, 9, 15 y 24 objetos fabricados).
+* 📜 **Recetas de Síntesis Actualizadas Progresivamente:**
+  * Incluye únicamente los objetos y materiales confirmados al desbloquearlos en el juego.
   * Checkbox interactivo para marcar los objetos que ya has fabricado.
   * Indicador dinámico que resalta los ingredientes que ya posees en verde.
   * Cálculo automático de materiales restantes considerando solo lo que te falta por sintetizar.

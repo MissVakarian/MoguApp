@@ -73,7 +73,7 @@
             <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i> Progreso del Taller
           </h2>
           <p class="text-sm text-slate-400 mt-1">
-            Crea objetos para desbloquear la siguiente tanda de recetas. Marca la casilla de los objetos que ya hayas sintetizado.
+            Consulta los objetos desbloqueados hasta ahora y marca los que ya hayas sintetizado.
           </p>
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
@@ -100,7 +100,7 @@
         </div>
       </div>
 
-      <!-- Contenedor dinámico de Tiers y Recetas -->
+      <!-- Contenedor dinámico de recetas -->
       <div id="recipes-container" class="space-y-8"></div>
     </section>
 
@@ -165,69 +165,23 @@
     // --- BASE DE DATOS DEL JUEGO ---
 
     const RECIPES_DATA = [
-      // TIER 1: Iniciales
       {
         tier: 1,
-        tierTitle: "Objetos Iniciales",
+        tierTitle: "Objetos desbloqueados",
         reqCrafts: 0,
         items: [
-          { name: "Chalé", reqs: { "Guijarro vital": 2, "Guijarro ígneo": 3 } },
-          { name: "Elixir", reqs: { "Guijarro ígneo": 2, "Guijarro frío": 2, "Guijarro rayo": 2, "Trozo de mitrilo": 4 } },
-          { name: "Brazal de energía", reqs: { "Guijarro fuerte": 2, "Guijarro frío": 1 } },
-          { name: "Anillo oscuro", reqs: { "Guijarro claro": 2, "Guijarro vital": 1, "Trozo de mitrilo": 2 } },
-          { name: "Cadena de fuerza", reqs: { "Guijarro bravo": 2, "Guijarro fuerte": 2 } },
-          { name: "Aro ingenioso", reqs: { "Guijarro bravo": 2, "Guijarro rayo": 1 } }
-        ]
-      },
-      // TIER 2: Tras fabricar 3
-      {
-        tier: 2,
-        tierTitle: "Tras fabricar 3 objetos",
-        reqCrafts: 3,
-        items: [
-          { name: "Omnipoción", reqs: { "Piedra ígnea": 1, "Piedra fría": 1, "Piedra rayo": 1, "Trozo de mitrilo": 2 } },
-          { name: "PH+1", reqs: { "Guijarro bravo": 3, "Mitrilio": 3, "Piedra brava": 2 } },
-          { name: "Brazal de ángel", reqs: { "Guijarro bravo": 3, "Guijarro fuerte": 3, "Piedra vital": 3 } },
-          { name: "Pulsera mágica", reqs: { "Guijarro ígneo": 3, "Guijarro frío": 3, "Guijarro rayo": 3, "Mitrilio": 2 } },
-          { name: "Cadena de guerra", reqs: { "Guijarro fuerte": 3, "Piedra fuerte": 1, "Piedra clara": 1 } },
-          { name: "Aro maestro", reqs: { "Guijarro claro": 3, "Piedra clara": 2, "Piedra brava": 2 } }
-        ]
-      },
-      // TIER 3: Tras fabricar 9
-      {
-        tier: 3,
-        tierTitle: "Tras fabricar 9 objetos",
-        reqCrafts: 9,
-        items: [
-          { name: "Omniéter", reqs: { "Piedra ígnea": 3, "Piedra fría": 3, "Piedra rayo": 3, "Guijarro vital": 5, "Cristal vital": 1 } },
-          { name: "Defensa +1", reqs: { "Guijarro claro": 5, "Piedra clara": 3, "Cristal claro": 1, "Gota pletórica": 1 } },
-          { name: "Brazal de Gaia", reqs: { "Guijarro fuerte": 5, "Piedra fuerte": 3, "Cristal vital": 1 } },
-          { name: "Pulsera rúnica", reqs: { "Piedra ígnea": 2, "Piedra fría": 2, "Piedra rayo": 2, "Mitrilio": 3 } },
-          { name: "Salvacorazones", reqs: { "Guijarro bravo": 3, "Guijarro fuerte": 3, "Cristal denso": 1 } },
-          { name: "Tres estrellas", reqs: { "Guijarro ígneo": 3, "Guijarro frío": 3, "Guijarro rayo": 3, "Orichalcum": 1, "Cristal puro": 1 } }
-        ]
-      },
-      // TIER 4: Tras fabricar 15
-      {
-        tier: 4,
-        tierTitle: "Tras fabricar 15 objetos",
-        reqCrafts: 15,
-        items: [
-          { name: "Omnielixir", reqs: { "Guijarro vital": 5, "Piedra vital": 3, "Cristal vital": 1, "Cristal puro": 1, "Viento recio": 2 } },
-          { name: "Fuerza +1", reqs: { "Guijarro fuerte": 5, "Piedra fuerte": 3, "Cristal denso": 1, "Gota pletórica": 1, "Orichalcum": 2 } },
-          { name: "Cadena de héroe", reqs: { "Guijarro bravo": 5, "Piedra brava": 3, "Cristal claro": 1 } },
-          { name: "Pulsera de poder", reqs: { "Cristal puro": 2, "Gota pletórica": 1, "Orichalcum": 3, "Viento recio": 1 } },
-          { name: "Corona de cristal", reqs: { "Cristal claro": 3, "Cristal denso": 3, "Cristal puro": 3, "Cristal vital": 3 } },
-          { name: "Cinta", reqs: { "Piedra ígnea": 5, "Piedra fría": 5, "Piedra rayo": 5, "Piedra vital": 5, "Viento recio": 3 } }
-        ]
-      },
-      // TIER 5: Tras fabricar 24
-      {
-        tier: 5,
-        tierTitle: "Tras fabricar 24 objetos",
-        reqCrafts: 24,
-        items: [
-          { name: "Arma artema", reqs: { "Piedra clara": 5, "Piedra fuerte": 5, "Piedra rayo": 5, "Gota pletórica": 3, "Viento recio": 3 } }
+          { name: "Omnipoción", reqs: { "Guijarro bravo": 1, "Guijarro fuerte": 1, "Trozo mitrilo": 4 } },
+          { name: "Chalé", reqs: { "Guijarro claro": 1, "Guijarro vital": 1 } },
+          { name: "Brazal de energía", reqs: { "Guijarro bravo": 2, "Guijarro vital": 1 } },
+          { name: "Cadena de fuerza", reqs: { "Guijarro fuerte": 2, "Guijarro claro": 1 } },
+          { name: "Pulsera mágica", reqs: { "Guijarro ígneo": 3, "Guijarro frío": 3, "Guijarro rayo": 3 } },
+          { name: "Arete de EXP", reqs: { "Roca brava": 1, "Roca fuerte": 1, "Roca de mitrilo": 1, "Cristal sereno": 1, "Materia oscura": 3 } },
+          { name: "Omniéter", reqs: { "Guijarro ígneo": 1, "Guijarro frío": 1, "Guijarro rayo": 1, "Mitrilo": 2 } },
+          { name: "Aro ingenioso", reqs: { "Guijarro vital": 3, "Guijarro frío": 1, "Trozo mitrilo": 3 } },
+          { name: "Brazal de ángel", reqs: { "Guijarro rayo": 3, "Piedra vital": 1 } },
+          { name: "Cadena de guerra", reqs: { "Guijarro ígneo": 3, "Piedra brava": 1 } },
+          { name: "Pulsera rúnica", reqs: { "Piedra ígnea": 3, "Piedra fría": 3, "Piedra rayo": 3 } },
+          { name: "Blasón moguri", reqs: { "Roca ígnea": 1, "Roca fría": 1, "Roca luminosa": 1, "Mitrilo": 5, "Orichalcum": 3 } }
         ]
       }
     ];
