@@ -114,7 +114,7 @@
             <h2 class="text-lg font-semibold text-slate-100 flex items-center gap-2">
               <i data-lucide="skull" class="w-5 h-5 text-amber-400"></i> Guía de Enemigos y Zonas
             </h2>
-            <p class="text-sm text-slate-400">Encuentra qué sincorazón suelta cada material y las indicaciones para conseguirlo.</p>
+            <p class="text-sm text-slate-400">Encuentra qué sincorazón suelta cada material. Puedes seleccionar varios materiales a la vez.</p>
           </div>
           
           <div class="relative w-full md:w-80">
@@ -247,7 +247,8 @@
     // ESTADO DE LA APLICACIÓN (Persistencia en LocalStorage)
     let state = {
       crafted: {}, // { "Chalé": true, ... }
-      inventory: {} // { "Guijarro vital": 5, ... }
+      inventory: {}, // { "Guijarro vital": 5, ... }
+      consumedCrafts: {} // Recetas cuyos materiales se descontaron automáticamente
     };
 
     // Inicializar lista de todos los materiales únicos requeridos
@@ -287,6 +288,11 @@
           console.error("Error al cargar estado", e);
         }
       }
+
+      // Compatibilidad con datos guardados antes del descuento automático
+      if (!state.crafted || typeof state.crafted !== 'object') state.crafted = {};
+      if (!state.inventory || typeof state.inventory !== 'object') state.inventory = {};
+      if (!state.consumedCrafts || typeof state.consumedCrafts !== 'object') state.consumedCrafts = {};
       
       // Asegurar que todos los materiales existan en el inventario
       getAllMaterialsList().forEach(mat => {
@@ -438,13 +444,45 @@
     }
 
     function toggleCrafted(itemName) {
-      state.crafted[itemName] = !state.crafted[itemName];
+      const item = RECIPES_DATA
+        .flatMap(tier => tier.items)
+        .find(recipe => recipe.name === itemName);
+
+      if (!item) return;
+
+      if (!state.crafted[itemName]) {
+        const missing = Object.entries(item.reqs)
+          .filter(([mat, qty]) => (state.inventory[mat] || 0) < qty)
+          .map(([mat, qty]) => `${mat}: faltan ${qty - (state.inventory[mat] || 0)}`);
+
+        if (missing.length > 0) {
+          alert(`No tienes materiales suficientes para fabricar ${itemName}:\n\n${missing.join('\n')}`);
+          renderRecipes();
+          return;
+        }
+
+        Object.entries(item.reqs).forEach(([mat, qty]) => {
+          state.inventory[mat] -= qty;
+        });
+        state.crafted[itemName] = true;
+        state.consumedCrafts[itemName] = true;
+      } else {
+        // Solo se devuelven materiales descontados por esta funcionalidad.
+        if (state.consumedCrafts[itemName]) {
+          Object.entries(item.reqs).forEach(([mat, qty]) => {
+            state.inventory[mat] = (state.inventory[mat] || 0) + qty;
+          });
+          delete state.consumedCrafts[itemName];
+        }
+        delete state.crafted[itemName];
+      }
+
       saveState();
       renderRecipes();
     }
 
     // --- RENDERIZADO DE PESTAÑA ENEMIGOS ---
-    let selectedBestiaryFilter = 'TODOS';
+    const selectedBestiaryFilters = new Set();
 
     function renderBestiary() {
       const grid = document.getElementById('bestiary-grid');
@@ -466,7 +504,7 @@
       grid.innerHTML = '';
 
       const filteredEnemies = ENEMIES_DATA.filter(e => {
-        const matchesFilter = selectedBestiaryFilter === 'TODOS' || e.item === selectedBestiaryFilter;
+        const matchesFilter = selectedBestiaryFilters.size === 0 || selectedBestiaryFilters.has(e.item);
         
         if (!matchesFilter) return false;
         if (!searchQuery) return true;
@@ -527,10 +565,22 @@
     }
 
     function setBestiaryFilter(mat) {
-      selectedBestiaryFilter = mat;
+      if (mat === 'TODOS') {
+        selectedBestiaryFilters.clear();
+      } else if (selectedBestiaryFilters.has(mat)) {
+        selectedBestiaryFilters.delete(mat);
+      } else {
+        selectedBestiaryFilters.add(mat);
+      }
+
       const btns = document.querySelectorAll('#bestiary-filters button');
       btns.forEach(btn => {
-        if (btn.innerText === mat || (mat === 'TODOS' && btn.innerText === 'Todos')) {
+        const isAllButton = btn.innerText === 'Todos';
+        const isSelected = isAllButton
+          ? selectedBestiaryFilters.size === 0
+          : selectedBestiaryFilters.has(btn.innerText);
+
+        if (isSelected) {
           btn.className = "filter-btn text-xs px-3 py-1 rounded-full border border-amber-500 bg-amber-500/20 text-amber-300 font-medium";
         } else {
           btn.className = "filter-btn text-xs px-3 py-1 rounded-full border border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700 transition";
